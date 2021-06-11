@@ -11,24 +11,17 @@ import (
 
 // Genesis hashes to enforce below configs on.
 var (
-	MainnetGenesisHash = common.HexToHash("0xbda7d5179d6e633b081cda323cb3cbff3877b03c9ceec0c2078d651dc2daf234")
-	// todo
+	MainnetGenesisHash = common.HexToHash("0xfac706b798eed83c61e0fdfaeabb87ef250ea7f6901c3f0a27f7f518e4de42c1")
 	TestnetGenesisHash = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d")
 )
 
 // TrustedCheckpoints associates each known checkpoint with the genesis hash of
 // the chain it belongs to.
-var TrustedCheckpoints = map[common.Hash]*TrustedCheckpoint{
-	MainnetGenesisHash: MainnetTrustedCheckpoint,
-	TestnetGenesisHash: TestnetTrustedCheckpoint,
-}
+var TrustedCheckpoints = map[common.Hash]*TrustedCheckpoint{}
 
 // CheckpointOracles associates each known checkpoint oracles with the genesis hash of
 // the chain it belongs to.
-var CheckpointOracles = map[common.Hash]*CheckpointOracleConfig{
-	MainnetGenesisHash: MainnetCheckpointOracle,
-	TestnetGenesisHash: TestnetCheckpointOracle,
-}
+var CheckpointOracles = map[common.Hash]*CheckpointOracleConfig{}
 
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
@@ -36,41 +29,24 @@ var (
 		ChainID:             big.NewInt(28628),
 		HomesteadBlock:      big.NewInt(0),
 		DAOForkBlock:        nil,
-		DAOForkSupport:      true,
+		DAOForkSupport:      false,
 		EIP150Block:         big.NewInt(0),
+		EIP150Hash:          common.Hash{},
 		EIP155Block:         big.NewInt(0),
 		EIP158Block:         big.NewInt(0),
 		ByzantiumBlock:      big.NewInt(0),
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		IstanbulBlock:       big.NewInt(0),
-		MuirGlacierBlock:    nil,
+		MuirGlacierBlock:    big.NewInt(0),
 		BerlinBlock:         big.NewInt(0),
+		YoloV3Block:         nil,
+		EWASMBlock:          nil,
+		Ethash:              nil,
 		Clique: &CliqueConfig{
 			Period: 15,
 			Epoch:  30000,
 		},
-	}
-
-	// MainnetTrustedCheckpoint contains the light client trusted checkpoint for the main network.
-	MainnetTrustedCheckpoint = &TrustedCheckpoint{
-		SectionIndex: 364,
-		SectionHead:  common.HexToHash("0x3fd20ff221f5e962bb66f57a61973bfc2ba959879a6509384a80a45d208b5afc"),
-		CHTRoot:      common.HexToHash("0xe35b3b807f4e9427fb4e2929961c78a9dc10f503a538319031cc7d00946a0591"),
-		BloomRoot:    common.HexToHash("0x340553b378b2db214b898be15c80ac5be7caffc2e6448fd6f7aff23290d89296"),
-	}
-
-	// MainnetCheckpointOracle contains a set of configs for the main network oracle.
-	MainnetCheckpointOracle = &CheckpointOracleConfig{
-		Address: common.HexToAddress("0x9a9070028361F7AAbeB3f2F2Dc07F82C4a98A02a"),
-		Signers: []common.Address{
-			common.HexToAddress("0x1b2C260efc720BE89101890E4Db589b44E950527"), // Peter
-			common.HexToAddress("0x78d1aD571A1A09D60D9BBf25894b44e4C8859595"), // Martin
-			common.HexToAddress("0x286834935f4A8Cfb4FF4C77D5770C2775aE2b0E7"), // Zsolt
-			common.HexToAddress("0xb86e2B0Ab5A4B1373e40c51A7C712c70Ba2f9f8E"), // Gary
-			common.HexToAddress("0x0DF8fa387C602AE62559cC4aFa4972A7045d6707"), // Guillaume
-		},
-		Threshold: 2,
 	}
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Rinkeby test network.
@@ -78,9 +54,9 @@ var (
 		ChainID:             big.NewInt(28629),
 		HomesteadBlock:      big.NewInt(1),
 		DAOForkBlock:        nil,
-		DAOForkSupport:      true,
+		DAOForkSupport:      false,
 		EIP150Block:         big.NewInt(2),
-		EIP150Hash:          common.HexToHash("0x9b095b36c15eaf13044373aef8ee0bd3a382a5abb92e402afa44b8249c3a90e9"),
+		EIP150Hash:          common.Hash{},
 		EIP155Block:         big.NewInt(3),
 		EIP158Block:         big.NewInt(3),
 		ByzantiumBlock:      big.NewInt(1_035_301),
@@ -89,30 +65,7 @@ var (
 		IstanbulBlock:       big.NewInt(5_435_345),
 		MuirGlacierBlock:    nil,
 		BerlinBlock:         big.NewInt(8_290_928),
-		Clique: &CliqueConfig{
-			Period: 15,
-			Epoch:  30000,
-		},
-	}
-
-	// TestnetTrustedCheckpoint contains the light client trusted checkpoint for the Rinkeby test network.
-	TestnetTrustedCheckpoint = &TrustedCheckpoint{
-		SectionIndex: 248,
-		SectionHead:  common.HexToHash("0x26874cf023695778cc3175d1bec19894204d8d0b756b587e81e35f300dc5b33c"),
-		CHTRoot:      common.HexToHash("0xc129d1ed6673c5d3e1068e9d97244e72952b7ca08acbd7b3bfa58bc3085c442c"),
-		BloomRoot:    common.HexToHash("0x1dafe79dcd7d348782aa834a4a4397890d9ad90643736791132ed5c16879a037"),
-	}
-
-	// TestnetCheckpointOracle contains a set of configs for the Rinkeby test network oracle.
-	TestnetCheckpointOracle = &CheckpointOracleConfig{
-		Address: common.HexToAddress("0xebe8eFA441B9302A0d7eaECc277c09d20D684540"),
-		Signers: []common.Address{
-			common.HexToAddress("0xd9c9cd5f6779558b6e0ed4e6acf6b1947e7fa1f3"), // Peter
-			common.HexToAddress("0x78d1aD571A1A09D60D9BBf25894b44e4C8859595"), // Martin
-			common.HexToAddress("0x286834935f4A8Cfb4FF4C77D5770C2775aE2b0E7"), // Zsolt
-			common.HexToAddress("0xb86e2B0Ab5A4B1373e40c51A7C712c70Ba2f9f8E"), // Gary
-		},
-		Threshold: 2,
+		Ethash:              new(EthashConfig),
 	}
 
 	// AllEthashProtocolChanges contains every protocol change (EIPs) introduced

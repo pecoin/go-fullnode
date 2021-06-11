@@ -219,9 +219,7 @@ func SetupGenesisBlockWithOverride(db pecdb.Database, genesis *Genesis, override
 }
 
 func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
-	log.Info("Genesis hash", ghash.Hex())
-	// init 0xaaa9b3e513ab1c367f3d17d3212d8aad3e8af22cd53d7cdc53026ba0a4859dc2
-	// auto 0xbda7d5179d6e633b081cda323cb3cbff3877b03c9ceec0c2078d651dc2daf234
+	log.Info("Check genesis hash", "hash", ghash.Hex())
 	switch {
 	case g != nil:
 		return g.Config
@@ -230,7 +228,8 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 	case ghash == params.TestnetGenesisHash:
 		return params.TestnetChainConfig
 	default:
-		return params.AllEthashProtocolChanges
+		// return params.AllEthashProtocolChanges
+		return params.AllCliqueProtocolChanges
 	}
 }
 
@@ -319,9 +318,8 @@ func GenesisBlockForTesting(db pecdb.Database, addr common.Address, balance *big
 // DefaultGenesisBlock returns the Ethereum main net genesis block.
 func DefaultGenesisBlock() *Genesis {
 	return &Genesis{
-		Config: params.MainnetChainConfig,
-		// Pc9GKzp8XoPpxGSSmAZRYXLFmzFEfbBmrF
-		ExtraData:  hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000382e3d0666b86c0c6009a85d8305ca0e35e2ca8808bf454a080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		Config:     params.MainnetChainConfig,
+		ExtraData:  hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000388e62325efdf20a50e6a1951108f7ab8ec98efc75102843a30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 		GasLimit:   hexutil.MustDecodeUint64("0xffffff"),
 		Difficulty: big.NewInt(1),
 		Alloc:      decodePrealloc(mainnetAllocData),
@@ -331,9 +329,8 @@ func DefaultGenesisBlock() *Genesis {
 // DefaultTestnetGenesisBlock returns the Rinkeby network genesis block.
 func DefaultTestnetGenesisBlock() *Genesis {
 	return &Genesis{
-		Config: params.TestnetChainConfig,
-		// Pc9GKzp8XoPpxGSSmAZRYXLFmzFEfbBmrF
-		ExtraData:  hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000382e3d0666b86c0c6009a85d8305ca0e35e2ca8808bf454a080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		Config:     params.TestnetChainConfig,
+		ExtraData:  hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000388e62325efdf20a50e6a1951108f7ab8ec98efc75102843a30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 		GasLimit:   hexutil.MustDecodeUint64("0xffffff"),
 		Difficulty: big.NewInt(1),
 		Alloc:      decodePrealloc(testnetAllocData),
