@@ -1876,7 +1876,7 @@ func (api *PublicDebugAPI) TestSignCliqueBlock(ctx context.Context, address comm
 		return common.Address{}, err
 	}
 	var signer common.Address
-	copy(signer[:], crypto.Keccak256(pubkey[1:])[7:])
+	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
 
 	return signer, nil
 }

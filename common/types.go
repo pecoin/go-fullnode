@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"database/sql/driver"
 	"encoding/hex"
 	"encoding/json"
@@ -20,7 +21,7 @@ const (
 	// HashLength is the expected length of the hash
 	HashLength = 32
 	// AddressLength is the expected length of the address
-	AddressLength = 25
+	AddressLength = 20
 	// Address prefix byte
 	AddressPrefixByte = 0x38
 )
@@ -193,13 +194,6 @@ func BytesToAddress(b []byte) Address {
 	return a
 }
 
-func BytesToAddressReplaceFirstByte(b []byte) Address {
-	if len(b) > 0 {
-		b[0] = AddressPrefixByte
-	}
-	return BytesToAddress(b)
-}
-
 // BigToAddress returns Address with byte values of b.
 // If b is larger than len(h), b will be cropped from the left.
 func BigToAddress(b *big.Int) Address { return BytesToAddress(b.Bytes()) }
@@ -208,7 +202,9 @@ func BigToAddress(b *big.Int) Address { return BytesToAddress(b.Bytes()) }
 // If s is larger than len(h), s will be cropped from the left.
 func HexToAddress(s string) Address { return BytesToAddress(FromHex(s)) }
 
-func Base58ToAddress(s string) Address { return BytesToAddress(FromBase58(s)) }
+func Base58ToAddress(s string) Address {
+	return BytesToAddress(FromBase58(s)[1:21])
+}
 
 // IsHexAddress verifies whether a string can represent a valid hex-encoded
 // Ethereum address or not.
@@ -220,7 +216,7 @@ func IsHexAddress(s string) bool {
 }
 
 func IsBase58Address(s string) bool {
-	return isBase58(s) && len(FromBase58(s)) == AddressLength
+	return isBase58(s) && len(FromBase58(s)) == 25
 }
 
 // Bytes gets the string representation of the underlying address.
@@ -277,7 +273,13 @@ func (a Address) hex() []byte {
 }
 
 func (a *Address) base58() []byte {
-	addr := base58.Encode(a[:])
+	var b [25]byte
+	b[0] = AddressPrefixByte
+	copy(b[1:21], a[:])
+	h1 := sha256.Sum256(b[0:21])
+	h2 := sha256.Sum256(h1[:])
+	copy(b[21:25], h2[:4])
+	addr := base58.Encode(b[:])
 	return []byte(addr)
 }
 
@@ -286,7 +288,7 @@ func (a *Address) base58() []byte {
 func (a Address) Format(s fmt.State, c rune) {
 	switch c {
 	case 'v', 's':
-		s.Write(a.checksumHex())
+		s.Write(a.base58())
 	case 'q':
 		q := []byte{'"'}
 		s.Write(q)
@@ -320,28 +322,47 @@ func (a *Address) SetBytes(b []byte) {
 
 // MarshalText returns the hex representation of a.
 func (a Address) MarshalText() ([]byte, error) {
-	//return hexutil.Bytes(a[:]).MarshalText()
-	return []byte(base58.Encode(a[:])), nil
+	var b [25]byte
+	b[0] = AddressPrefixByte
+	copy(b[1:21], a[:])
+	h1 := sha256.Sum256(b[0:21])
+	h2 := sha256.Sum256(h1[:])
+	copy(b[21:25], h2[:4])
+	return []byte(base58.Encode(b[:])), nil
 }
 
 // UnmarshalText parses a hash in hex syntax.
 func (a *Address) UnmarshalText(input []byte) error {
-	//return hexutil.UnmarshalFixedText("Address", input, a[:])
 	b, err := base58.Decode(string(input))
+	b[0] = AddressPrefixByte
 	if err != nil {
 		return err
 	}
-	*a = BytesToAddress(b)
+	h1 := sha256.Sum256(b[0:21])
+	h2 := sha256.Sum256(h1[:])
+	if !bytes.Equal(b[21:25], h2[:4]) {
+		return errors.New("text address sha256 check failed")
+	}
+	*a = BytesToAddress(b[1:21])
 	return nil
 }
 
 // UnmarshalJSON parses a hash in hex syntax.
 func (a *Address) UnmarshalJSON(input []byte) error {
-	// return hexutil.UnmarshalFixedJSON(addressT, input, a[:])
 	var str string
 	err := json.Unmarshal(input, &str)
 	if err != nil {
 		return err
+	}
+	b, err := base58.Decode(str)
+	b[0] = AddressPrefixByte
+	if err != nil {
+		return err
+	}
+	h1 := sha256.Sum256(b[0:21])
+	h2 := sha256.Sum256(h1[:])
+	if !bytes.Equal(b[21:25], h2[:4]) {
+		return errors.New("json address sha256 check failed")
 	}
 	*a = Base58ToAddress(str)
 	return nil
@@ -390,7 +411,7 @@ func (a *UnprefixedAddress) UnmarshalText(input []byte) error {
 	if err != nil {
 		return err
 	}
-	*a = UnprefixedAddress(BytesToAddress(b))
+	*a = UnprefixedAddress(BytesToAddress(b[1:21]))
 	return nil
 }
 
@@ -423,7 +444,7 @@ func NewMixedcaseAddressFromString(addr string) (*MixedcaseAddress, error) {
 	if !IsBase58Address(addr) {
 		return nil, errors.New("invalid address")
 	}
-	a := FromBase58(addr)
+	a := FromBase58(addr)[1:21]
 	return &MixedcaseAddress{addr: BytesToAddress(a), original: addr}, nil
 }
 

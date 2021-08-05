@@ -414,10 +414,9 @@ func recoverPlain(sighash common.Hash, R, S, Vb *big.Int, homestead bool) (commo
 	if len(pub) == 0 || pub[0] != 4 {
 		return common.Address{}, errors.New("invalid public key")
 	}
-	//var addr common.Address
-	//copy(addr[:], crypto.Keccak256(pub[1:])[7:])
-	//return addr, nil
-	return common.BytesToAddressReplaceFirstByte(crypto.Keccak256(pub[1:])[7:]), nil
+	var addr common.Address
+	copy(addr[:], crypto.Keccak256(pub[1:])[12:])
+	return addr, nil
 }
 
 // deriveChainId derives the chain id from the given v parameter

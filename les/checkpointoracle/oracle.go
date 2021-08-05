@@ -134,7 +134,7 @@ func (oracle *CheckpointOracle) VerifySigners(index uint64, hash [32]byte, signa
 			return false, nil
 		}
 		var signer common.Address
-		copy(signer[:], crypto.Keccak256(pubkey[1:])[7:])
+		copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
 		if _, exist := checked[signer]; exist {
 			continue
 		}

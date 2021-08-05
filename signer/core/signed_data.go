@@ -564,7 +564,7 @@ func (typedData *TypedData) EncodePrimitiveValue(encType string, encValue interf
 			return nil, dataMismatchError(encType, encValue)
 		}
 		retval := make([]byte, 32)
-		copy(retval[7:], common.HexToAddress(stringValue).Bytes())
+		copy(retval[12:], common.HexToAddress(stringValue).Bytes())
 		return retval, nil
 	case "bool":
 		boolValue, ok := encValue.(bool)

@@ -313,7 +313,7 @@ func gasCall(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize
 	var (
 		gas            uint64
 		transfersValue = !stack.Back(2).IsZero()
-		address        = common.BytesToAddress(stack.Back(1).PaddedBytes(common.AddressLength))
+		address        = common.Address(stack.Back(1).Bytes20())
 	)
 	if evm.chainRules.IsEIP158 {
 		if transfersValue && evm.StateDB.Empty(address) {
@@ -406,7 +406,7 @@ func gasSelfdestruct(evm *EVM, contract *Contract, stack *Stack, mem *Memory, me
 	// EIP150 homestead gas reprice fork:
 	if evm.chainRules.IsEIP150 {
 		gas = params.SelfdestructGasEIP150
-		var address = common.BytesToAddress(stack.Back(0).PaddedBytes(common.AddressLength))
+		var address = common.Address(stack.Back(0).Bytes20())
 
 		if evm.chainRules.IsEIP158 {
 			// if empty and transfers value

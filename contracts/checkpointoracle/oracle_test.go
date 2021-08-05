@@ -134,7 +134,7 @@ func assertSignature(addr common.Address, index uint64, hash [32]byte, r, s [32]
 		return false
 	}
 	var signer common.Address
-	copy(signer[:], crypto.Keccak256(pubkey[1:])[7:])
+	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
 	return bytes.Equal(signer.Bytes(), expect.Bytes())
 }
 
